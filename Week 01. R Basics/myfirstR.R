@@ -3,8 +3,11 @@
 # Get use in using R studio first before doing the project
 
 # Assigning variable & prining
-name <- readline("Enter your name: ")
-sentence <- sprintf("Hello, %s!", name)
+name <- readline("Enter your name: ") # prompt user input in r
+sentence <- sprintf("Hello, %s!", name) # formatted string in r
+welcome <- paste(a, b, c) # concatenate elements in r
+a <- b <- c <- "morning" # assigning same value to multiple variables
 (6 %% 2) != 8 || 10 == 9 -> y # '//' in python is the same as '%%' in R
 print(y)
+print(welcome)
 print(sentence)
