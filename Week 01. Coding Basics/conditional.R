@@ -1,4 +1,6 @@
 # Conditional - IF
+x <- 6
+y <- TRUE
 if (y && x >= 7){
     print("statement1")
 } else if (x == 6) {

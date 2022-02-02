@@ -1,5 +1,6 @@
 # Array
 arr <- array(3:20)
+print(arr)
 
 # Vector
 vec <- c(3, TRUE, "study R")
