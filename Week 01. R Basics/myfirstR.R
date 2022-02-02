@@ -7,7 +7,7 @@ name <- readline("Enter your name: ") # prompt user input in r
 sentence <- sprintf("Hello, %s!", name) # formatted string in r
 welcome <- paste(a, b, c) # concatenate elements in r
 a <- b <- c <- "morning" # assigning same value to multiple variables
-(6 %% 2) != 8 || 10 == 9 -> y # '//' in python is the same as '%%' in R
+(6 %% 2) != 8 || 10 == 9 -> y # '%%' for modulus, '%/%' for integer division
 print(y)
 print(welcome)
 print(sentence)
