@@ -1,8 +1,9 @@
-# Week 2 - 3: Sorting, selecting, comparing using 'dplyr' package
+# Week 2 - 3: Plotting graph using 'ggplot2' package
 
 "
 Get the 'ymd' function by installing 'lubridate' package (year month date format)
 Install 'ggplot' package to plot data on a graph
+Use R Studio to load and download graph, or use R in VS Code
 "
 
 # Load object
