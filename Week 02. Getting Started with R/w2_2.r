@@ -15,6 +15,7 @@ distinct(): remove duplicate entries
 collect(): force computation, bring data back
 "
 
+library(nycflights13)
 library(dplyr)
 data1 <- airports %>% select(name, lat) %>% filter(name == "Randall Airport")
 data2 <- airports %>% filter(faa %in% c('ALB', 'BDL', 'BTV'))
