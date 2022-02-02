@@ -2,6 +2,7 @@
 
 "
 'dplyr' provides simple functions for data manipulation actions
+reference: https://dplyr.tidyverse.org/
 
 Some basic data manipulation operations:
 select(): select variables (columns)

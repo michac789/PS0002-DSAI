@@ -2,6 +2,7 @@
 
 "
 arrange(): arrange data ascendingly be default, use desc() for descending
+-- using boxplot for the graph --
 "
 
 # Load packages, objects, select then arrange descendingly based on numflights
