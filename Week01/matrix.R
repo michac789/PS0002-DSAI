@@ -1,6 +1,6 @@
 # Matrix basic operations in R
-mat <- matrix(c(1, 2, 3, 4, 5, 6), nrow = 2, ncol = 3) # defining matrix
-print(mat) # print whole matrix
+mat <- matrix(c(1, 2, 3, 4, 5, 6), byrow = T, nrow = 2, ncol = 3) # defining matrix
+print(mat) # print whole matrix; byrow used to fill the matrix by row instead of column
 print(mat[1, 3]) # print a single entry of a matrix
 print(mat[2,]) # print a whole row of a matrix
 print(mat[,3]) # print a whole column of a matrix
@@ -17,3 +17,4 @@ mat2 <- matrix(c('a', 'b'), nrow = 2, ncol = 1)
 print(mat2)
 mat3 <- cbind(mat, mat2) # combining two matrix using rbind (by row) or cbind (by column)
 print(mat3)
+print(t(mat3)) # use t() for the transpose of matrix

@@ -13,7 +13,9 @@ vec[5:7] = c(12, 13, 14)
 vec <- vec[vec != 12]
 print(length(vec))
 print(vec)
-print(vec[6])
+print(vec[6]) # indexing in vector
+vec2 <- rep('yeah', 3) # replicates element using rep
+print(vec2)
 
 # Array: has 1 or more dimension compared to 2D matrix
 arr <- array(3:7)
