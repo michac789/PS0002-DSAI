@@ -14,6 +14,7 @@ print(class(x))
 print(class(y))
 
 # Math operations: max, min, sqrt, abs, ceiling, floor, ..
+# sum, mean, median, range, var, cor, sort, rank, ...
 # String operations: cat, nchar, grepl, paste, <escape c>
 # Escape characters: \\, \n, \r, \t, \b
 # Arithmetic Operators: +, -, *, /, ^, %%, %/%
