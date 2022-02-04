@@ -1,4 +1,4 @@
-# Week 2 - 4: Merging and data cleaning
+# Week 2 - 5: Merging and data cleaning
 
 "
 Relational databases using SQL basic operators:

@@ -38,7 +38,7 @@ delay <- summarise(bycarrier, count = n(), dist = mean(distance, na.rm=TRUE),
 ## Scatter Plot ##
 # shows the relationship between two variables
 # Init ggplot
-ggplot(delay, aes(x = dist, y = delay)) 
+ggplot(delay, aes(x = dist, y = delay))
 # add points using a geom layer called geom_point
 ggplot(delay, aes(x = dist, y = delay)) + geom_point()
 # add a smoothing curve by geom_smooth () 
