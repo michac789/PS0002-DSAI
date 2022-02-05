@@ -61,6 +61,7 @@ sleep1noNA <- sleep1 %>% filter(!is.na(rem_ratio), !is.na(diff_sw), !is.na(bodyw
 ggplot(sleep1noNA, aes(x = bodywt, y = rem_ratio)) + geom_point() + geom_smooth(method = 'lm')
 # ggplot(sleep1noNA, aes(x = bodywt, y = rem_ratio)) + geom_point() + geom_smooth()
 ggplot(sleep1noNA, aes(x = bodywt, y = diff_sw)) + geom_point() + geom_smooth(method = 'lm')
+# ggplot(sleep1noNA, aes(x = bodywt, y = diff_sw)) + geom_point() + geom_smooth()
 # Comment:
 # The relationship of the first plot is preety vague and random, though generally there is a slight
 # increase of rem_ratio when body weight increases (when using a linear line), but when we do not use
