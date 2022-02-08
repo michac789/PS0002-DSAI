@@ -5,7 +5,7 @@
 library(dplyr)
 library(ggplot2)
 
-# View descriptive summary
+# View descriptive summary 
 summary(msleep)
 
 # 1. Create dataframe 'sleep1', include all variables except name, genus, conservation,
