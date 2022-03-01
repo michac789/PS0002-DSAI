@@ -33,7 +33,7 @@ modelLM <- lm(sales~., data = train.data)
 
 
 
-# 5. Compare and interpret models
+# 5. Compare and interpret models 
 
 
 
