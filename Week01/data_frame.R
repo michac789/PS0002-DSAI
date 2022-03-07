@@ -36,3 +36,6 @@ df[2:4,] # get the 2nd to the 4th row only
 df[2,3] # get the 2nd row, 3rd column
 df$Name # print all the rows from the 'Name' column
 select(df, 3) # select the third column
+attach(df) # make the variable accessible by name
+df[Math_Score > 60,]
+
