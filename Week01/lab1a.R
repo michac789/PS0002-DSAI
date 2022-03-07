@@ -1,6 +1,7 @@
 # Lab 1 (Part 1)
 
 
+##################################################
 # Task 1
 
 # Set working directory
@@ -8,16 +9,20 @@
 
 # a. Create a data frame 'lab1' by importing the 'lab1fixed.txt' file into R
 var_lab1fixed <- c('id', 'gender', 'height', 'weight', 'siblings')
-lab1 <- read.fwf("lab1fixed.txt", col.names = var_lab1fixed, width = c(3, 1, 3, 2, 1))
+lab1 <- read.fwf("assets/lab1fixed.txt", col.names = var_lab1fixed, width = c(3, 1, 3, 2, 1))
 # plot(lab1$height, lab1$weight)
 
 # b. Create a data frame 'lab1m' which contains all data for all male subjects
 # how many males are there? ans=48
 lab1m <- lab1[lab1[,2] == 'M',]
 length(lab1m[,1])
+# alternative:
+attach(lab1)
+nrow(lab1[gender == "M",])
 
 # c. Imort lab1test, then merge lab1 and lab1test into a data frame 'lab1merge'
-lab1test <- read.table("lab1test.txt", header = T)
+# what are the test scores for individuals greater than 182cm? ans=55,76,54
+lab1test <- read.table("assets/lab1test.txt", header = T)
 lab1merge <- merge(lab1, lab1test, by = "id")
 lab1merge[lab1merge[,3] > 182, 6]
 

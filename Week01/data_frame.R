@@ -27,13 +27,15 @@ length(df) # print no of columns, similar to ncol
 names(df) # print the column names
 row.names(df) # print row names
 
-# Accessing & Selecting Data Frame
+# Accessing & Modifying & Filtering Data Frame
 df[2] # get the 2nd column in column format
 df[,2] # get the 2nd column in a row (vector) format
 df[,-2] # get every column except the 2nd column
 df[2,] # get the 2nd row
 df[2:4,] # get the 2nd to the 4th row only
 df[2,3] # get the 2nd row, 3rd column
+df[2,3] = 100 # modify the 2nd row, 3rd column
+df[1,seq(2,3)] = c(77,84) # modify the 2nd and 3rd column of the first row
 df$Name # print all the rows from the 'Name' column
 select(df, 3) # select the third column
 attach(df) # make the variable accessible by name
