@@ -1,6 +1,9 @@
 # Build-in Function
 vec = c(10, 30, 70)
 print(max(vec))
+# Commonly used build-in functions:
+# max(x), min(x), sum(x), mean(x), median(x), range(x)
+# var(x), cor(x, y), sort(x), rank(x)
 
 # User Defined Function
 multiply <- function(num1, num2){

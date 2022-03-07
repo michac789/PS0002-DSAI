@@ -5,8 +5,8 @@
 # Assigning variable & prining
 name <- readline("Enter your name: ") # prompt user input in r
 sentence <- sprintf("Hello, %s!", name) # formatted string in r
-welcome <- paste(a, b, c) # concatenate elements in r
 a <- b <- c <- "morning" # assigning same value to multiple variables
+welcome <- paste(a, b, c) # concatenate elements in r
 (6 %% 2) != 8 || 10 == 9 -> y # '%%' for modulus, '%/%' for integer division
 print(y)
 print(welcome)
