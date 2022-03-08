@@ -2,11 +2,11 @@
 # Data source: https://raw.githubusercontent.com/genomicsclass/dagdata/master/inst/extdata/msleep_ggplot2.csv
 
 # Import packages & set working directory
-# setwd("C:/My Files/MY REPOSITORIES/PS0002/Week03")
+# setwd("C:/My Files/MY REPOSITORIES/PS0002/Week02")
 library(dplyr)
 
 # Read data into a dataframe using read.csv
-df <- read.csv("msleep_ggplot2.csv")
+df <- read.csv("assets/msleep_ggplot2.csv")
 
 # 1. Check the number of rows and columns using dim()
 dim(df)
