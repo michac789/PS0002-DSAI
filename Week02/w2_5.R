@@ -19,6 +19,9 @@ OpenRefine http://openrefine.org
 Tableau http://www.tableau.com
 "
 
+library(nycflights13)
+library(dplyr)
+
 # Merging data
 jandelays <- flights %>%
     select(origin, dest, year, month, day, carrier, arr_delay) %>%
