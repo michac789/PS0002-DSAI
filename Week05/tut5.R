@@ -14,6 +14,7 @@ data("Boston", package="MASS")
 head(Boston)
 dim(Boston)
 summary(Boston)
+names(Boston)
 
 # 3. Split data into test and training sets
 set.seed(100)
