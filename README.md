@@ -1,6 +1,6 @@
 # PS0002
 
-## TODO - Create Table
+## TODO - Create Table  
 
 Week 00 - Getting Started With R
 R Variables, Data Types, Operators, Input & Output
