@@ -1,3 +1,7 @@
+"
+
+"
+
 # Conditional - IF
 x <- 6
 y <- TRUE
@@ -25,3 +29,5 @@ switch(option2,
 # Conditional - Ternary
 num <- if(2^2 == 1) "a" else "b"
 print(num)
+num2 <- ifelse((2^2 == 1), "a", "b")
+print(num2)
