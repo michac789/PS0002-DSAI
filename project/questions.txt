@@ -1,0 +1,10 @@
+
+
+01. How to classify for 3 or more variables using logistic regression?
+02. Tradeoff between increasing specificity and sensitivity vs overall acuracy?
+03. How to do linear regression that has bounded values or integer outputs only?
+04. Is there any concrete way to show that a variable does not affect the outcome so it can be ignored?
+05. Should we remove all variables with near zero variance from the predictor?
+06. How regular supervised learning can perform piecewise defined function abilities, or should neural network be used?
+07. Is there anyway to determine linear/radial/etc kernel, or we just have to do trial and error?
+numeric & integer svc
