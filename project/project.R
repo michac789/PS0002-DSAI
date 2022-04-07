@@ -49,6 +49,7 @@ df %>%
     group_by(month) %>%
     summarize(match_count = n(), avRating = mean(Rating), sum(MOTM))
 # TODO!
+# TODO - boxplot
 # does day affect rating or MOTM rate?
 pday1 <- ggplot(df, aes(Day)) + geom_bar()
 pday2 <- ggplot(df, aes(x = Day, y = Rating)) + geom_point()
@@ -63,7 +64,8 @@ ggplot(df, aes(Venue)) + geom_bar()
 df %>%
     select(Venue, Rating, MOTM) %>%
     group_by(Venue) %>%
-    summarise(avRating = mean(Rating), MOTM = sum(MOTM))
+    summarise(avRating = mean(Rating), MOTM = sum(MOTM), count = n()) %>%
+    mutate(MOTM_rate = MOTM / count)
 # TODO!
 # plot relationships of various potential predictors
 predictors <- colnames(df[, 10:(ncol(df) - 2)])
@@ -74,12 +76,16 @@ for (i in seq(1, length(predictors))) {
 }
 do.call(grid.arrange, pp)
 
+corrplot(cor(df[,10:ncol(df)]), type="upper",
+    method="color", addCoef.col = "black", number.cex = 0.6)
+
 ### Split Training & Testing Set ###
 # drop unused predictors, remove data that has almost zero variance
 df <- select(df, 10:ncol(df) & -c(nearZeroVar(df)))
 # df_regr to predict rating, df_clas to predict MOTM
 df_regr <- select(df, -MOTM)
-df_clas <- select(df, -Rating)
+df_clas <- select(df, -Rating) %>%
+    mutate(MOTM = as.factor(MOTM))
 # make sure the data is selected properly
 names(df_regr)
 dim(df_regr)
@@ -127,11 +133,12 @@ abline(0, 1, col = "darkblue")
 # TODO
 
 ### Logistic Regression Classifier ###
+set.seed(100)
 # perform logistic regression using binomial family
 logreg_model <- glm(MOTM ~ ., data = clas_train_data, family = "binomial")
 summary(logreg_model)
 # predict outcome based on test data, test with various cutoff level
-cutoff <- 0.3
+cutoff <- 0.15
 logreg_predictions <- ifelse(predict(logreg_model,
     newdata = clas_test_data, type = "response") > cutoff, 1, 0)
 # display confusion matrix, overall accuracy
@@ -144,11 +151,31 @@ specificity(cm_logreg)
 # display the coefficients to understand how significant each predictor is
 exp(coef(logreg_model))
 
+confusionMatrix(logreg_predictions %>% as.factor,
+    clas_test_data$MOTM %>% as.factor, positive = "1")
+
 ### KNN Classification ###
-# nor <- function(x) {
-#     (x - min(x)) / (max(x) - min(x)) # nolint
-# }
-# TODO
+knnclas_model <- train(
+    MOTM ~ ., data = clas_train_data, method = "knn",
+    trControl = trainControl("cv", number = 10),
+    preProcess = c("center", "scale"),
+    tuneLength = 15
+)
+knnclas_model %>% predict(clas_test_data) %>%
+    confusionMatrix(clas_test_data$Rating)
+
+nor <- function(x) {
+    (x - min(x)) / (max(x) - min(x))
+}
+clas_train_data_norm <- as.data.frame(lapply(clas_train_data, nor))
+clas_test_data_norm <- as.data.frame(lapply(clas_test_data, nor))
+knnclas_pred <- knn(clas_train_data_norm, clas_test_data_norm,
+    cl = clas_train_data_norm$MOTM, k = 13)
+tab <- table(knnclas_pred, clas_test_data_norm$MOTM)
+accuracy <- function(x) {
+    sum(diag(x)) / (sum(rowSums(x))) * 100
+}
+accuracy(tab)
 
 ### Support Vector Machine ###
 # convert MOTM output into factor data type
@@ -215,4 +242,4 @@ hierclus <- hclust(dismat, method = "complete", members = NULL)
 hierclus
 # plot dendogram and draw colored border of seperation
 plot(hierclus, cex = 0.1, pch = 21)
-rect.hclust(hierclus, k = 5, border = seq(1, 5))
+rect.hclust(hierclus, k = 5, border = seq(2, 6))
