@@ -1,5 +1,12 @@
 "
-PS0002 Project
+PS0002 Intro To DSAI
+Final Project R Code
+
+Created By:
+Hans Farrell Soegeng
+Michael Andrew Chan
+Reinhart Hubert Liang
+Rivaldo Billy Sebastian
 "
 
 ### Load all required packages ###
@@ -15,10 +22,11 @@ library(e1071) # for svc classifier
 # type your working directory containing file_name here
 current_dir <- "C:/My Files/MY REPOSITORIES/PS0002/project"
 # type csv file name containing dataset
-file_name <- "sample.csv"
+file_name <- "dataset.csv"
 # set current working directory, move into dataframe
 setwd(current_dir)
-df <- read.csv(file_name, header = T, sep = ";")
+# read csv file, store into data frame 'df'
+df <- read.csv(file_name, header = T, sep = ";", fileEncoding = "UTF-8-BOM")
 # understanding dataset
 dim(df) # show dimension
 names(df) # show all variable (column) names
@@ -27,65 +35,87 @@ summary(df) # show short summary of all column
 str(df) # show each variable types and values
 
 ### Data Wrangling ###
-# if last column (MOTM) is NA, place the value 0, else it is 1
-df[, ncol(df)] <- ifelse(complete.cases(df$MOTM), 1, 0)
-# select all column that has only numbers but still in string format
-# we want to change all ',' to '.', then convert to numeric type
-target <- as.character(names(df %>% select(where(is.character) & 10:ncol(df))))
+# check if there is any NA values
+table(is.na(df))
+# verify that only the last column (MOTM) has NA value, the rest has no NA
+table(is.na(select(df, -MOTM)))
+# if last column (MOTM) is NA, place the value 0 instead, else it is 1
+df[is.na(df)] <- 0
+table(is.na(df))
+# select all column (except the first 4 columns: date, name, day, venue)
+# that has only numbers but still in string format
+target <- as.character(names(df %>% select(where(is.character) & 5:ncol(df))))
+target
+# for all of these columns, we want to convert from chr to numeric type
 for (col in target) {
+    # get the index number of the column name
     col_index <- grep(paste("^", col, "$", sep = ""), colnames(df))
+    # for each column, replace ',' to '.' then convert to numeric
     df[, col_index] <- as.numeric(gsub(",", ".", df[, col_index]))
 }
-str(df) # check
-# remove all other NA values if there is any, make sure rating is not 0
-df <- df %>% filter(complete.cases(df)) %>% filter(Rating != "0")
+# remove data if rating is 0 (invalid), or if there are NA values
+# note: these NA are caused by some rows of the column Cmp. in target that was
+# empty string (chr, not NA), but resulting in NA when converted to numeric
 dim(df)
+df <- df %>% filter(Rating != 0 & complete.cases(df))
+dim(df)
+str(df) # check
 
 ### Exploratory Data Analysis ###
-# does month affect rating or MOTM rate?
-df %>%
-    select(Date, Rating, MOTM) %>%
-    mutate(month = substr(Date, 4, 5)) %>%
-    group_by(month) %>%
-    summarize(match_count = n(), avRating = mean(Rating), sum(MOTM))
-# TODO!
-# TODO - boxplot
-# does day affect rating or MOTM rate?
-pday1 <- ggplot(df, aes(Day)) + geom_bar()
-pday2 <- ggplot(df, aes(x = Day, y = Rating)) + geom_point()
-gridExtra::grid.arrange(pday1, pday2, nrow = 2)
-df %>%
-    select(Day, Rating, MOTM) %>%
-    group_by(Day) %>%
-    summarise(match_count = n(), avRating = mean(Rating), MOTM = sum(MOTM)) %>%
-    mutate(MOTM_rate = MOTM / match_count)
-# does venue affect rating or MOTM rate?
-ggplot(df, aes(Venue)) + geom_bar()
+# we claim that date and day has no effect to rating or MOTM
+# we are also not interested in name column (too much player names)
+# drop first three column (date, name, Day)
+df <- df[, 4:ncol(df)]
+# we want to investigate whether if venue affect rating or MOTM?
+# display average rating and MOTM rate for each venue group
 df %>%
     select(Venue, Rating, MOTM) %>%
     group_by(Venue) %>%
-    summarise(avRating = mean(Rating), MOTM = sum(MOTM), count = n()) %>%
+    summarise(count = n(), avRating = mean(Rating), MOTM = sum(MOTM)) %>%
     mutate(MOTM_rate = MOTM / count)
-# TODO!
-# plot relationships of various potential predictors
-predictors <- colnames(df[, 10:(ncol(df) - 2)])
+# visualize density curves to show rating distribution
+ggplot(df, aes(Rating)) + geom_density(color = "magenta", fill = "lightpink") +
+    geom_vline(aes(xintercept = mean(Rating)), color = "brown")
+# visualize rating distribution count using histogram
+ggplot(df, aes(Rating)) + geom_histogram()
+# visualize rating on different venues side by side using boxplot
+boxplot(filter(df, Venue == "Home")$Rating, filter(df, Venue == "Away")$Rating,
+    names = c("Home", "Away"), ylab = "Rating", xlab = "Venue",
+    col = c("Lightblue", "Lightgreen"))
+# venue also has very insignificant effect, so we drop this column
+df <- df[, 2:ncol(df)]
+# scatter plot relationships of various potential predictors with rating
+predictors <- colnames(df[, 1:(ncol(df) - 2)])
 pp <- list()
 for (i in seq(1, length(predictors))) {
     pp[[i]] <- ggplot(df, aes_string(x = predictors[i], y = "Rating")) +
         geom_point() + geom_smooth(method = "lm")
 }
 do.call(grid.arrange, pp)
-
-corrplot(cor(df[,10:ncol(df)]), type="upper",
-    method="color", addCoef.col = "black", number.cex = 0.6)
+# box plot relationships for each MOTM (0 and 1) with various predictors
+pp2 <- list()
+for (i in seq(1, length(predictors))) {
+    pp2[[i]] <- ggplot(df, aes_string(x = "MOTM", y = predictors[i],
+        fill = "factor(MOTM)")) + geom_boxplot()
+}
+do.call(grid.arrange, pp2)
+# violin plot relationships for each MOTM (0 and 1) with various predictors
+pp3 <- list()
+for (i in seq(1, length(predictors))) {
+    pp3[[i]] <- ggplot(df, aes_string(x = "MOTM", y = predictors[i])) +
+        geom_point() + geom_violin()
+}
+do.call(grid.arrange, pp3)
+# display correlation plot
+corrplot(cor(df[, 10:ncol(df)]), type = "upper",
+    method = "color", addCoef.col = "black", number.cex = 0.6)
 
 ### Split Training & Testing Set ###
 # drop unused predictors, remove data that has almost zero variance
 df <- select(df, 10:ncol(df) & -c(nearZeroVar(df)))
 # df_regr to predict rating, df_clas to predict MOTM
 df_regr <- select(df, -MOTM)
-df_clas <- select(df, -Rating) %>%
-    mutate(MOTM = as.factor(MOTM))
+df_clas <- select(df, -Rating)
 # make sure the data is selected properly
 names(df_regr)
 dim(df_regr)
@@ -102,6 +132,20 @@ regr_test_data <- df_regr[-regr_training_id, ]
 clas_training_id <- sample(seq(1, nrow(df_clas)), nrow(df_clas) * 0.8)
 clas_train_data <- df_clas[clas_training_id, ]
 clas_test_data <- df_clas[-clas_training_id, ]
+
+### Linear Regression ###
+lmodel <- lm(Rating ~ ., data = regr_train_data)
+summary(lmodel)
+summary(lmodel)$r.squared
+predictionslm <- predict(lmodel, regr_test_data)
+plot(regr_test_data$Rating, predictionslm)
+abline(0, 1, col = "red")
+RMSE(predictionslm, regr_test_data$Rating)
+plot(lmodel)
+# TODO - analyze residual and qqplot
+# TODO - remove outliers from data
+# TODO - add second order term where possible
+# TODO - improve by creating final linreg model
 
 ### KNN Regression ###
 set.seed(101)
@@ -127,42 +171,67 @@ RMSE(regr_knn_predictions, regr_test_data$Rating)
 # plot of predicted values vs real values
 plot(regr_test_data$Rating, regr_knn_predictions,
     main = "KNN Regression Prediction")
-abline(0, 1, col = "darkblue")
-
-### Linear Regression ###
-# TODO
+abline(0, 1, col = "#f9018d")
+# define rsquared function taking 2 vector inputs
+rsq <- function(x, y) {
+    return(cor(x, y) ^ 2)
+}
+rsq(regr_test_data$Rating, regr_knn_predictions)
 
 ### Logistic Regression Classifier ###
-set.seed(100)
+# define f1score function that takes in confusion matrix input
+f1score <- function(cm) {
+    true_positive <- cm[1, 1]
+    false_positive <- cm[1, 2]
+    false_negative <- cm[2, 2]
+    precision <- true_positive / (true_positive + false_positive)
+    recall <- true_positive / (true_positive + false_negative)
+    f1score <- 2 * ((precision * recall) / (precision + recall))
+    return(f1score)
+}
 # perform logistic regression using binomial family
+set.seed(100)
 logreg_model <- glm(MOTM ~ ., data = clas_train_data, family = "binomial")
 summary(logreg_model)
-# predict outcome based on test data, test with various cutoff level
-cutoff <- 0.15
-logreg_predictions <- ifelse(predict(logreg_model,
-    newdata = clas_test_data, type = "response") > cutoff, 1, 0)
-# display confusion matrix, overall accuracy
-mean(logreg_predictions == clas_test_data$MOTM)
-cm_logreg <- table(logreg_predictions, clas_test_data$MOTM)
-cm_logreg
-# display sensitivity and specificity
-sensitivity(cm_logreg)
-specificity(cm_logreg)
-# display the coefficients to understand how significant each predictor is
-exp(coef(logreg_model))
+extractf1 <- 
 
-confusionMatrix(logreg_predictions %>% as.factor,
-    clas_test_data$MOTM %>% as.factor, positive = "1")
+# loop for different cutoff values
+for (cutoff in seq(0.1, 0.9, 0.05)) {
+    # predict outcome based on test data, test with various cutoff level
+    logreg_predictions <- ifelse(predict(logreg_model,
+        newdata = clas_test_data, type = "response") > cutoff, 1, 0)
+    # display confusion matrix, overall accuracy
+    mean(logreg_predictions == clas_test_data$MOTM)
+    cm_logreg <- table(logreg_predictions, clas_test_data$MOTM)
+    cm_logreg
+    # display the coefficients to understand how significant each predictor is
+    exp(coef(logreg_model))
+    # display confusion matrix, sensitivity and specificity
+    confusionMatrix(logreg_predictions %>% as.factor,
+        clas_test_data$MOTM %>% as.factor, positive = "1")
+    a <- confusionMatrix(as.factor(logreg_predictions),
+        as.factor(clas_test_data$MOTM), mode = "everything", positive = "1")
+    print(substr(a[4], 158, 165))
+    # print f1 score for different values
+    print(paste(cutoff, f1score(cm_logreg)))
+}
 
 ### KNN Classification ###
+clas_train_data2 <- mutate(clas_train_data, MOTM = factor(MOTM))
+clas_test_data2 <- mutate(clas_test_data, MOTM = factor(MOTM))
 knnclas_model <- train(
-    MOTM ~ ., data = clas_train_data, method = "knn",
+    MOTM ~ ., data = clas_train_data2, method = "knn",
     trControl = trainControl("cv", number = 10),
     preProcess = c("center", "scale"),
     tuneLength = 15
 )
-knnclas_model %>% predict(clas_test_data) %>%
-    confusionMatrix(clas_test_data$Rating)
+eval <- knnclas_model %>%
+    predict(clas_test_data) %>%
+    confusionMatrix(clas_test_data2$MOTM)
+substr(eval[4], 156, 168)
+substr(a[4], 158, 165)
+
+# confusionMatrix(pred, actual, mode = "everything", positive="1")
 
 nor <- function(x) {
     (x - min(x)) / (max(x) - min(x))
