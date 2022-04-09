@@ -1,12 +1,5 @@
 "
-PS0002 Intro To DSAI
-Final Project R Code
-
-Created By:
-Hans Farrell Soegeng
-Michael Andrew Chan
-Reinhart Hubert Liang
-Rivaldo Billy Sebastian
+PS0002 Project
 "
 
 ### Load all required packages ###
@@ -102,17 +95,20 @@ do.call(grid.arrange, pp2)
 # violin plot relationships for each MOTM (0 and 1) with various predictors
 pp3 <- list()
 for (i in seq(1, length(predictors))) {
-    pp3[[i]] <- ggplot(df, aes_string(x = "MOTM", y = predictors[i])) +
-        geom_point() + geom_violin()
+    pp3[[i]] <- ggplot(df, aes_string(x = "MOTM", y = predictors[i],
+        fill = "factor(MOTM)")) + geom_point() + geom_violin()
 }
 do.call(grid.arrange, pp3)
 # display correlation plot
-corrplot(cor(df[, 10:ncol(df)]), type = "upper",
-    method = "color", addCoef.col = "black", number.cex = 0.6)
+corrplot(cor(df[, seq(1, ncol(df))]), type = "upper",
+    method = "color", addCoef.col = "black", number.cex = 0.4)
+# potential 2nd order term: Gls, SoT, Touches, xG, SCA, Carries
+# qqplot
+par(mfrow = c(1, 1))
+qqnorm(df$Rating)
+qqline(df$Rating)
 
 ### Split Training & Testing Set ###
-# drop unused predictors, remove data that has almost zero variance
-df <- select(df, 10:ncol(df) & -c(nearZeroVar(df)))
 # df_regr to predict rating, df_clas to predict MOTM
 df_regr <- select(df, -MOTM)
 df_clas <- select(df, -Rating)
@@ -134,23 +130,47 @@ clas_train_data <- df_clas[clas_training_id, ]
 clas_test_data <- df_clas[-clas_training_id, ]
 
 ### Linear Regression ###
-lmodel <- lm(Rating ~ ., data = regr_train_data)
-summary(lmodel)
-summary(lmodel)$r.squared
-predictionslm <- predict(lmodel, regr_test_data)
-plot(regr_test_data$Rating, predictionslm)
+# perform initial linear regression and print summary
+lmodel1 <- lm(Rating ~ ., data = regr_train_data)
+summary(lmodel1)
+summary(lmodel1)$adj.r.squared # 0.7862
+# assess model performance by predicting test data, plot graph, print RMSE
+predictionslm <- predict(lmodel1, regr_test_data)
+par(mfrow = c(1, 1))
+plot(regr_test_data$Rating, predictionslm, col = "blue",
+    xlab = "Real Rating (Test Data)", ylab = "Predicted Rating")
 abline(0, 1, col = "red")
-RMSE(predictionslm, regr_test_data$Rating)
-plot(lmodel)
-# TODO - analyze residual and qqplot
-# TODO - remove outliers from data
-# TODO - add second order term where possible
-# TODO - improve by creating final linreg model
+RMSE(predictionslm, regr_test_data$Rating) # 0.3989
+# display residual plot, qqplot, check for outlier
+par(mfrow = c(2, 2))
+plot(lmodel1) # outliers: 2365, 1775, 2360
+# remove outliers from data and resample
+df_regr2 <- df_regr[-c(2365, 1775, 2360), ]
+set.seed(100)
+regr_training_id2 <- sample(seq(1, nrow(df_regr)), nrow(df_regr) * 0.8)
+regr_train_data2 <- df_regr2[regr_training_id2, ]
+regr_test_data2 <- df_regr2[-regr_training_id2, ]
+# add second order based where |r|>0.5: Gls, SoT, Touches, xG, SCA, Carries
+lmodel2 <- lm(Rating ~ . + I(Gls ^ 2) + I(SoT ^ 2) + I(Touches ^ 2) +
+    I(xG ^ 2) + I(SCA ^ 2) + I(Carries ^ 2), data = regr_train_data2)
+summary(lmodel2)
+summary(lmodel2)$adj.r.squared # 0.7985
+# assess 2nd linear model performance
+predictionslm2 <- predict(lmodel2, regr_test_data2)
+par(mfrow = c(1, 1))
+plot(regr_test_data2$Rating, predictionslm2, col = "blue",
+    xlab = "Real Rating (Test Data)", ylab = "Predicted Rating")
+abline(0, 1, col = "red")
+RMSE(predictionslm2, regr_test_data2$Rating) # 0.4027
+par(mfrow = c(2, 2))
+plot(lmodel2)
+# choose lmodel1 that has lower RMSE compared to lmodel2
 
 ### KNN Regression ###
 set.seed(101)
 # cross validation sampling with around 40-50 sample each group
 cv_count <- floor(nrow(regr_train_data) / 45)
+cv_count
 # number of k to tune
 k_count <- 10
 # using knn regression; output: MOTM, inputs: all the other variables
@@ -163,60 +183,72 @@ knnregr_model <- train(
 )
 # plot the different k values
 plot(knnregr_model)
-knnregr_model$bestTune # select best k
+knnregr_model$bestTune # best k = 11
 # predict test data, show rmse
 regr_knn_predictions <- as.numeric(predict(knnregr_model, regr_test_data))
 head(regr_knn_predictions)
-RMSE(regr_knn_predictions, regr_test_data$Rating)
+RMSE(regr_knn_predictions, regr_test_data$Rating) # 0.4801
 # plot of predicted values vs real values
-plot(regr_test_data$Rating, regr_knn_predictions,
+par(mfrow = c(1, 1))
+plot(regr_test_data$Rating, regr_knn_predictions, col = "blue",
     main = "KNN Regression Prediction")
 abline(0, 1, col = "#f9018d")
 # define rsquared function taking 2 vector inputs
 rsq <- function(x, y) {
     return(cor(x, y) ^ 2)
 }
-rsq(regr_test_data$Rating, regr_knn_predictions)
+rsq(regr_test_data$Rating, regr_knn_predictions) # 0.6889
+# clearly knn regression is worse than linear regression, pick lmodel1
 
 ### Logistic Regression Classifier ###
-# define f1score function that takes in confusion matrix input
-f1score <- function(cm) {
-    true_positive <- cm[1, 1]
-    false_positive <- cm[1, 2]
-    false_negative <- cm[2, 2]
-    precision <- true_positive / (true_positive + false_positive)
-    recall <- true_positive / (true_positive + false_negative)
-    f1score <- 2 * ((precision * recall) / (precision + recall))
-    return(f1score)
+# function that accepts confusion matrix object and display f1 as our metric
+extractf1 <- function(str) {
+    start <- regexpr("F1", str[4])[[1]]
+    val <- substr(str[4], start + 5, start + 10)
+    val <- substr(val, 1, ifelse(regexpr(",", val)[[1]] == -1,
+        6, regexpr(",", val)[[1]] - 1))
+    return(format(round(as.numeric(val), 4), nsmall = 4))
 }
-# perform logistic regression using binomial family
+# perform logistic regression using binomial family, show summary
 set.seed(100)
 logreg_model <- glm(MOTM ~ ., data = clas_train_data, family = "binomial")
 summary(logreg_model)
-extractf1 <- 
-
-# loop for different cutoff values
-for (cutoff in seq(0.1, 0.9, 0.05)) {
+logreg_metrics <- data.frame()
+# loop cutoff from 0.02 to 0.98 with step of 0.02
+for (cutoff in seq(0.02, 0.98, 0.02)) {
     # predict outcome based on test data, test with various cutoff level
     logreg_predictions <- ifelse(predict(logreg_model,
         newdata = clas_test_data, type = "response") > cutoff, 1, 0)
-    # display confusion matrix, overall accuracy
-    mean(logreg_predictions == clas_test_data$MOTM)
+    # overall accuracy, confusion matrix table
+    ovrl <- mean(logreg_predictions == clas_test_data$MOTM)
     cm_logreg <- table(logreg_predictions, clas_test_data$MOTM)
-    cm_logreg
-    # display the coefficients to understand how significant each predictor is
-    exp(coef(logreg_model))
-    # display confusion matrix, sensitivity and specificity
-    confusionMatrix(logreg_predictions %>% as.factor,
-        clas_test_data$MOTM %>% as.factor, positive = "1")
-    a <- confusionMatrix(as.factor(logreg_predictions),
+    # store confusion matrix object here
+    cm_data <- confusionMatrix(as.factor(logreg_predictions),
         as.factor(clas_test_data$MOTM), mode = "everything", positive = "1")
-    print(substr(a[4], 158, 165))
-    # print f1 score for different values
-    print(paste(cutoff, f1score(cm_logreg)))
+    # for every cutoff level, store metrics in logreg_metrics data frame
+    logreg_metrics <- rbind(logreg_metrics, c(
+        cutoff, extractf1(cm_data), format(round(ovrl, 4), nsmall = 4),
+        format(round(sensitivity(cm_logreg), 4), nsmall = 4),
+        format(round(specificity(cm_logreg), 4), nsmall = 4)))
 }
+colnames(logreg_metrics) <- c("cutoff", "f1score", "overall", "sens", "spec")
+head(logreg_metrics)
+dim(logreg_metrics)
+attach(logreg_metrics)
+# pick row with highest f1score
+best <- logreg_metrics[which.max(f1score), ]
+best # get best cutoff = 0.1
+# overall accuracy = 0.8833, sensitivity = 0.8909, specificity = 0.8
+# display confusion matrix with this cutoff = 0.1
+logreg_predictions <- ifelse(predict(logreg_model, newdata = clas_test_data,
+    type = "response") > as.numeric(best$cutoff), 1, 0)
+confusionMatrix(as.factor(logreg_predictions),
+    as.factor(clas_test_data$MOTM), mode = "everything", positive = "1")
 
 ### KNN Classification ###
+
+# TODO
+
 clas_train_data2 <- mutate(clas_train_data, MOTM = factor(MOTM))
 clas_test_data2 <- mutate(clas_test_data, MOTM = factor(MOTM))
 knnclas_model <- train(
@@ -225,26 +257,16 @@ knnclas_model <- train(
     preProcess = c("center", "scale"),
     tuneLength = 15
 )
+knnclas_model %>% predict(clas_test_data) %>%
+    confusionMatrix(clas_test_data2$MOTM)
 eval <- knnclas_model %>%
     predict(clas_test_data) %>%
     confusionMatrix(clas_test_data2$MOTM)
+
+
 substr(eval[4], 156, 168)
 substr(a[4], 158, 165)
 
-# confusionMatrix(pred, actual, mode = "everything", positive="1")
-
-nor <- function(x) {
-    (x - min(x)) / (max(x) - min(x))
-}
-clas_train_data_norm <- as.data.frame(lapply(clas_train_data, nor))
-clas_test_data_norm <- as.data.frame(lapply(clas_test_data, nor))
-knnclas_pred <- knn(clas_train_data_norm, clas_test_data_norm,
-    cl = clas_train_data_norm$MOTM, k = 13)
-tab <- table(knnclas_pred, clas_test_data_norm$MOTM)
-accuracy <- function(x) {
-    sum(diag(x)) / (sum(rowSums(x))) * 100
-}
-accuracy(tab)
 
 ### Support Vector Machine ###
 # convert MOTM output into factor data type
@@ -291,7 +313,7 @@ wcss <- function(k) {
 k_values <- 1:15
 set.seed(100)
 wcss_k <- sapply(k_values, wcss)
-# plot to gain k = 5
+# plot to gain k = 7 (??)
 plot(k_values, wcss_k, type = "b", pch = 19, frame = F,
     xlab = "Number of clusters K",
     ylab = "Total within-cluster sum of squares")
