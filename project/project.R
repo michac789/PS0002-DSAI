@@ -232,7 +232,7 @@ rsq(regr_test_data$Rating, regr_knn_predictions) # 0.7565
 # clearly knn regression is worse than linear regression, pick lmodel2
 
 ### Logistic Regression Classifier ###
-# function that accepts confusion matrix object and display f1 as our metric
+# function that accepts confusion matrix object and return f1 as our metric
 extractf1 <- function(str) {
     start <- regexpr("F1", str[4])[[1]]
     val <- substr(str[4], start + 5, start + 10)
@@ -317,7 +317,7 @@ nrow(clas_train_data2_n)
 nrow(clas_train_data2_y)
 knnclas_metrics <- data.frame()
 # loop through different p (percentage of train data with motm == 0 used)
-for (p in seq(0.1, 1, 0.05)) {
+for (p in seq(0.05, 1, 0.05)) {
     # use only p percent training data with motm == 0
     set.seed(100)
     clas_train_data2_n_id <- sample(seq(1, nrow(clas_train_data2_n)),
@@ -379,11 +379,35 @@ dfnew2 <- rbind(
         select(p, spec) %>%
         mutate(metric = "spec") %>%
         rename(val = spec))
-dfnew2 <- transform(dfnew, p = as.numeric(p), val = as.numeric(val))
+dfnew2 <- transform(dfnew2, p = as.numeric(p), val = as.numeric(val))
 ggplot(dfnew2, aes(x = p, y = val, group = metric)) +
     geom_line(aes(color = metric)) + geom_point(aes(color = metric)) +
     theme(axis.line = element_line(colour = "#1f7140", size = 1,
     linetype = "solid")) + labs(title = "KNN Classification")
+# recreate of final model that we used (p = 0.1)
+p <- 0.1
+set.seed(100)
+clas_train_data2_n_id <- sample(seq(1, nrow(clas_train_data2_n)),
+    nrow(clas_train_data2_n) * p)
+clas_train_data2_n_used <- clas_train_data2_n[clas_train_data2_n_id, ]
+clas_train_data_used <- rbind(clas_train_data2_n_used, clas_train_data2_y)
+ratio <- nrow(clas_train_data2_n_used) / nrow(clas_train_data2_y)
+set.seed(101)
+cv_count2 <- floor(nrow(clas_train_data_used) / 45)
+knnclas_model <- train(
+    MOTM ~ ., data = clas_train_data_used, method = "knn",
+    trControl = trainControl("cv", number = cv_count2),
+    preProcess = c("center", "scale"),
+    tuneLength = 15
+)
+# display model summary and confusion matrix
+knnclas_model
+knnclas_predictions <- predict(knnclas_model, clas_test_data2)
+table(knnclas_predictions)
+ovrl <- mean(knnclas_predictions == clas_test_data2$MOTM)
+cm_knnclas <- table(knnclas_predictions, clas_test_data2$MOTM)
+confusionMatrix(as.factor(knnclas_predictions),
+    as.factor(clas_test_data2$MOTM), mode = "everything", positive = "1")
 
 ### Support Vector Machine ###
 # convert MOTM output into factor data type
