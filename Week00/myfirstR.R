@@ -1,4 +1,8 @@
-# You can use R studio or VS Code with radian and appropriate extension to load R files
+"
+R Getting Started
+"
+
+# You can use R studio or VS Code with radian and appropriate R extension
 # Use '#' to comment, similar to in Python
 # Get use in using R studio first before doing the project
 

@@ -1,6 +1,10 @@
+"
+R Data Types
+"
+
 # Showing the different data type available from a list
-data_list <- list(63, 43.7, 7L, -4+3i, 'c', "any", FALSE)
-for (data in data_list){
+data_list <- list(63, 43.7, 7L, -4 + 3i, "c", "any", FALSE, NA)
+for (data in data_list) {
     text <- paste(data, class(data))
     print(text)
 }
