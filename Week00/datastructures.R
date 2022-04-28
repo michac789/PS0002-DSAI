@@ -20,9 +20,9 @@ vec <- vec[vec != 12]
 # numeric(a): vector of all 0 with length a
 # rep(a, b): repeat a for b times
 # seq(a, b, c): sequence of number from a to b inclusive, step c
-vec2 <- c(10, numeric(4), rep(2, 3), rep(1:2, 2),
+vec2 <- c(10, NA, numeric(4), rep(2, 3), rep(1:2, 2),
     rep(c(5, 7), 2:3), seq(6, 10, 2))
-print(vec2)
+print(vec2, na.print = "-1")
 print(length(vec))
 print(vec)
 print(vec[6]) # indexing in vector

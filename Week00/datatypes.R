@@ -1,5 +1,5 @@
 "
-R Data Types
+R Data Types & Operators
 "
 
 # Showing the different data type available from a list
@@ -16,6 +16,14 @@ x <- as.integer(x)
 y <- as.complex(x)
 print(class(x))
 print(class(y))
+
+# Miscellaneous keywords
+a <- Inf # infinity
+b <- NaN # not a number
+print(paste(class(a), class(b)))
+print(is.finite(a))
+print(is.nan(b))
+print(is.na(NA)) # NA indicating not available / no values
 
 "
 Some common R operators:
