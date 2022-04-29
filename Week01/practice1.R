@@ -1,3 +1,7 @@
+"
+R Fundamentals Practice (Part 1)
+"
+
 # Lab 1 (Part 1)
 # Get familiar using R and RStudio
 
@@ -15,7 +19,7 @@ plot(lab1$height, lab1$weight)
 
 # b. Create a data frame 'lab1m' which contains all data for all male subjects
 # how many males are there? ans=48
-lab1m <- lab1[lab1[,2] == 'M', ]
+lab1m <- lab1[lab1[, 2] <- "M", ]
 length(lab1m[, 1])
 # alternative:
 attach(lab1)

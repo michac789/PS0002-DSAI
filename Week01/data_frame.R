@@ -49,19 +49,23 @@ df[, -2] # get every column except the 2nd column
 df[2, ] # get the 2nd row
 df[2:4, ] # get the 2nd to the 4th row only
 df[2, 3] # get the 2nd row, 3rd column
-df[2, 3] = 100 # modify the 2nd row, 3rd column
-df[1, seq(2, 3)] = c(77, 84) # modify the 2nd and 3rd column of the first row
+
+# Manipulating Data Frame
+df[2, 3] <- 100 # modify the 2nd row, 3rd column
+df[1, seq(2, 3)] <- c(77, 84) # modify the 2nd and 3rd column of the first row
 df$Name # print all the rows from the 'Name' column
 attach(df) # make the variable accessible by name instead of using '$'
 df[Math_Score > 60, ]
+dfx <- df
+dfx[["Math_Score"]] <- NULL # removing a column
 
 # Select (Columns), Filter (Rows), Ordering
-select(df, 3) # select the third column
-select(df, Name, Math_Score) # select the columns: name, math_score
-select(df, -English_Score) # same output as above
+df[, 3] # select the third column
+df[, c("Name", "Math_Score")] # select the columns: name, math_score
+df[, -which(names(df) %in% c("English_Score"))] # same output as above
 filter(df, Math_Score > 60 & English_Score < 90) # filter for rows
 filter(df, Name %in% c("Ben", "Charlie"))
-select(filter(df, Math_Score > 60 & English_Score < 90), Name)
+filter(df, Math_Score > 60 & English_Score < 90)
 df[order(Math_Score), ] # order based on math score
 df[order(-English_Score), ] # order reverse based on english score
 df[rev(order(English_Score)), ] # same as above

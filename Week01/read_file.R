@@ -14,7 +14,7 @@ R Input File
 setwd("C:/My Files/MY REPOSITORIES/PS0002/Week01")
 
 # Scan: input through terminal, blank line indicates end of input
-input <- scan()
+input <- scan(what = "") # looking for a string
 input
 
 # Read table: try ex1.3

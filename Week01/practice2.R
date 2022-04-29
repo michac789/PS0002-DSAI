@@ -1,3 +1,7 @@
+"
+R Fundamentals Practice (Part 2)
+"
+
 # Lab 1 (Part 2)
 # Get familiar using R and RStudio
 
