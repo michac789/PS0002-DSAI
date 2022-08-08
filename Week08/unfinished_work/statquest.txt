@@ -1,0 +1,44 @@
+--- 01. Introduction To Machine Learning ---
+- Training Data: used to train the data
+- Testing Data: used to evaluate machine learning methods
+- How to assess if a machine learning model does well?
+Able to make the best predictions from the testing data
+
+--- 02. Cross Validation ---
+1) Training
+2) Testing
+> Resampling methods that use different portions of the data to train
+and test the model on different iterations
+- Prevents overfitting or selection bias, how model generalize
+
+--- 03. Confusion Matrix ---
+Rows: predicted, Columns: known truth
+Example for 2 different options:
+* True Positives, False Positives
+* False Negatives, True Negatives
+Matrix has dimension: k x k, where
+k: number of options to choose from
+
+--- 04. Sensitivity & Specificity ---
+Sensitivity = True Positives / True Positives + False Negatives
+Specificity = True Negatives / True Negatives + False Positives
+Sensitivity (True Positive Rate), Specificity (True Negative Rate)
+False Positive Rate = 1 - Specificity = False P / False P + True P
+False Negative Rate = 1 - Sensitivity = False N / False N + True N
+
+--- 05. Bias & Variance ---
+Bias: inability of machine learning method to capture true relationship
+Variance: difference in fits between data sets
+*Prevent overfitting & underfitting
+A good model should minimize bias and variance (tradeoff)
+higher bias = lower variance, lower bias = high variance
+
+--- 06. ROC & AUC ---
+- Receiver Operator Characteristics (ROC):
+show graph of sensitivity (y-axis) against false positve rate
+summarises all of the confusion matrix that each threshold produced
+- Area Under Curve (AUC):
+Compare between methods; larger area means better predictions
+
+
+

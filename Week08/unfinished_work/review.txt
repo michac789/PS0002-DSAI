@@ -1,0 +1,4 @@
+1) R^2: larger means more correlated
+2) p-value to determine if R2 is significant
+3) Use line to predict size given weight
+* least squares, R^2 by residual

@@ -1,0 +1,4 @@
+- Week 4 Lecture Watch (Stats Insights)
+- Tutorial 4
+- Review Week 5 (Lecture, Tut, Lab)
+- Linear Regression
